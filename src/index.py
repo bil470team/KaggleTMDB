@@ -33,10 +33,34 @@ def create_column(name):
     X_train.drop([name], axis=1, inplace=True)
     X_test.drop([name], axis=1, inplace=True)
 
-
 create_column('homepage')
 create_column('overview')
 create_column('tagline')
 create_column('status')
 create_column('belongs_to_collection')
 
+def create_json_column(columnNameToProcess, fieldName, dataFrame):
+    name = []
+    for i in dataFrame[columnNameToProcess]:
+        if(not(pd.isnull(i))):
+            if (eval(i)[0]['name'] == fieldName):
+                name.append(1)
+            else:
+                name.append(0)
+        else:
+            name.append(0)
+    return name
+genres_list = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary',
+               'Drama', 'Family', 'Fantasy', 'Foreign', 'History', 'Horror', 
+               'Music', 'Mystery', 'Romance', 'Science Fiction', 'TV Movie',
+               'Thriller', 'War', 'Western']
+
+for i in genres_list:
+    nameForColumn = 'genre_'+i
+    X_train[nameForColumn] = create_json_column('genres', i, X_train)
+    X_test[nameForColumn] = create_json_column('genres', i, X_test)
+    
+X_train.drop(['genres'], axis=1, inplace=True)
+X_test.drop(['genres'], axis=1, inplace=True)
+
+    
