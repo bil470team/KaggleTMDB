@@ -6,7 +6,7 @@ import json
 
 dataset = pd.read_csv('../data/train.csv')
 # If its taking too long comment out this next line.
-# dataset = dataset.loc[:5,]
+# dataset = dataset.loc[:5, ]
 tmdb = TMDb()
 key = 'e4f05a4f127ed9ce6df860bbdc59d597'
 tmdb.api_key = key
@@ -61,7 +61,7 @@ def create_key_actor_columns():
     dataset.insert(1, column='actor1', value=actors1)
     dataset.insert(2, column='actor2', value=actors2)
     dataset.insert(3, column='actor3', value=actors3)
-    dataset.to_csv("../new_data/new_train.csv", sep='\t')
+    dataset.to_csv("../data/processed_train.csv", sep='\t')
 
 
 print(dataset.shape)
