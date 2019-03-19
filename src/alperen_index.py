@@ -1,11 +1,12 @@
 import pandas as pd
-import numpy as np
 from tmdbv3api import TMDb # this is TMDB library
 import requests
 import ast
 import json
 
 dataset = pd.read_csv('../data/train.csv')
+# If its taking too long comment out this next line.
+# dataset = dataset.loc[:5,]
 tmdb = TMDb()
 key = 'e4f05a4f127ed9ce6df860bbdc59d597'
 tmdb.api_key = key
@@ -23,11 +24,13 @@ def get_popularity(actor_id):
 
 
 def get_key_actors():
-    actors1 = actors2 = actors3 = actors4 = actors5 = []
+    actors1 = []
+    actors2 = []
+    actors3 = []
+    print(len(actors1))
     for index, row in dataset.iterrows():
         cast = row['cast']
         count = 1
-        #cast = cast.replace('\'', '\"')
         cast = cast.replace("None", "\"None\"")
         cast_JSON = ast.literal_eval(cast)
         for actor in cast_JSON:
@@ -42,13 +45,7 @@ def get_key_actors():
                 elif count == 3:
                     popularity = get_popularity(str(actor_id))
                     actors3.append(popularity)
-                elif count == 4:
-                    popularity = get_popularity(str(actor_id))
-                    actors4.append(popularity)
-                elif count == 5:
-                    popularity = get_popularity(str(actor_id))
-                    actors5.append(popularity)
-                else:  # Take the first 5 people
+                else:  # Take the first 3 people
                     break
             except:  # If the cast is smaller than 5 people
                 break
@@ -56,6 +53,16 @@ def get_key_actors():
             print(actor['name'], end=' ')
             print(popularity)
             count = count + 1
-    return actors1, actors2, actors3, actors4, actors5
+    return actors1, actors2, actors3
 
-get_key_actors()
+
+def create_key_actor_columns():
+    actors1, actors2, actors3 = get_key_actors()
+    dataset.insert(1, column='actor1', value=actors1)
+    dataset.insert(2, column='actor2', value=actors2)
+    dataset.insert(3, column='actor3', value=actors3)
+    dataset.to_csv("../new_data/new_train.csv", sep='\t')
+
+
+print(dataset.shape)
+create_key_actor_columns()
