@@ -29,7 +29,7 @@ def create_column(name):
     X_train.loc[X_train[name].isnull() == False, has_name] = 1
     X_test[has_name] = 0
     X_test.loc[X_test[name].isnull() == False, has_name] = 1
-    # Now because the column has_status is created "status" is no longer needed, so drop it.
+    # Now because the column has_homepage is created "homepage" is no longer needed, so drop it.
     X_train.drop([name], axis=1, inplace=True)
     X_test.drop([name], axis=1, inplace=True)
 
@@ -38,6 +38,5 @@ create_column('homepage')
 create_column('overview')
 create_column('tagline')
 create_column('status')
+create_column('belongs_to_collection')
 
-sns.set(style = "ticks")
-sns.barplot(x="popularity", y="revenue", data=dataset)
