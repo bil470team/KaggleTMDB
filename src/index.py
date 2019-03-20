@@ -12,14 +12,14 @@ dataset = pd.read_csv("../data/train.csv")
 testset= pd.read_csv("../data/test.csv")
 #Dropping imdb_id and poster_path features as they are irrelevant.
 #Also dropping id because it is just an index for dataset.
-dataset.drop(['imdb_id','poster_path', 'id'],axis=1,inplace=True)
-testset.drop(['imdb_id','poster_path', 'id'],axis=1,inplace=True)
+dataset.drop(['imdb_id','poster_path', 'original_title'],axis=1,inplace=True)
+testset.drop(['imdb_id','poster_path', 'original_title'],axis=1,inplace=True)
 y_train = dataset['revenue']
-
-
 #dataset.drop(['revenue'], axis = 1, inplace = True)
 X_train = dataset
 X_test = testset
+#testset.drop(['revenue'], axis = 1, inplace = True)
+
 
 
 # for example if the name is homepage it creates a column as has_homepage.
@@ -50,6 +50,7 @@ def create_json_column(columnNameToProcess, fieldName, dataFrame):
         else:
             name.append(0)
     return name
+
 genres_list = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary',
                'Drama', 'Family', 'Fantasy', 'Foreign', 'History', 'Horror', 
                'Music', 'Mystery', 'Romance', 'Science Fiction', 'TV Movie',
@@ -63,4 +64,10 @@ for i in genres_list:
 X_train.drop(['genres'], axis=1, inplace=True)
 X_test.drop(['genres'], axis=1, inplace=True)
 
+
+for c in ['original_language', 'production_companies', 'production_countries', 'spoken_languages', 'Keywords']:
+    lbl = preprocessing.LabelEncoder()
+    lbl.fit(list(X_train[c].fillna('').astype(str)) + list(X_test[c].fillna('').astype(str)))
+    X_train[c] = lbl.transform(X_train[c].fillna(''))
+    X_test[c] = lbl.transform(X_test[c].fillna(''))
     
