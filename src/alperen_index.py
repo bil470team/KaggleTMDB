@@ -5,6 +5,7 @@ import ast
 import json
 
 train_set = pd.read_csv('../data/train.csv')
+test_set = pd.read_csv('../data/test.csv')
 # If its taking too long comment out this next line.
 tmdb = TMDb()
 key = 'e4f05a4f127ed9ce6df860bbdc59d597'
@@ -22,7 +23,7 @@ def get_popularity(actor_id):
         return 0
 
 
-def get_key_actors():
+def get_key_actors(dataset):
     actors1 = []
     actors2 = []
     actors3 = []
@@ -91,20 +92,21 @@ def get_key_actors():
         big_count = big_count + 1
     return actors1, actors2, actors3
 
-"""""
-size = 3000
-times = 30
-proportion = int(size / times)  # make it dividable
-for i in range(1, times):
-    if i == 1:
-        dataset = train_set.loc[0:i*proportion, ]
-    else:
-        dataset = train_set.loc[((i-1)*proportion)+1:i*proportion, ]
-"""
-dataset = train_set.loc[0:]
-actors1, actors2, actors3 = get_key_actors()
-dataset.insert(1, column='actor1', value=actors1)
-dataset.insert(2, column='actor2', value=actors2)
-dataset.insert(3, column='actor3', value=actors3)
-dataset.to_csv("../data/processed_train.csv", sep=',')
-print("data_processed is done.")
+
+# Returns a csv file with filename processed_{{name}}
+def create_columns_of_key_actors(data, name):
+    dataset = data.loc[0:]
+    actors1, actors2, actors3 = get_key_actors(dataset)
+    dataset.insert(1, column='actor1', value=actors1)
+    dataset.insert(2, column='actor2', value=actors2)
+    dataset.insert(3, column='actor3', value=actors3)
+    dataset.to_csv("../data/processed_"+name+".csv", sep=',')
+    print("data_processed is done.")
+
+# Already done. It took 1h45min.
+# create_columns_of_key_actors(train_set,"train")
+
+
+# PLEASE SOMEBODY RUN THIS CODE! I'm done with this! :(  - [Alperen Elbasan]
+print(test_set.shape)
+create_columns_of_key_actors(test_set, "test")
