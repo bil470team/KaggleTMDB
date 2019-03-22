@@ -30,8 +30,8 @@ release_dates = pd.read_csv('../extraData/release_dates_per_country.csv')
 
 #Data scraping done by us.
 #Related code is located at: https://github.com/bil470team/KaggleTMDB/blob/preprocessing/src/alperen_index.py
-actors = pd.read_csv('../extraData/processed_test.csv')[['imdb_id', 'actor1', 'actor2', 'actor3']]
-
+train_actors = pd.read_csv('../extraData/processed_train.csv')[['imdb_id', 'actor1', 'actor2', 'actor3']]
+test_actors = pd.read_csv('../extraData/processed_test.csv')[['imdb_id', 'actor1', 'actor2', 'actor3']]
 release_dates['id'] = range(1,7399)
 release_dates.drop(['original_title','title'],axis = 1,inplace = True)
 release_dates.index = release_dates['id']
@@ -48,10 +48,10 @@ trainAdditionalFeatures = trainAdditionalFeatures.dropna()
 testAdditionalFeatures = testAdditionalFeatures.dropna()
 
 train = pd.merge(train, trainAdditionalFeatures, how='left', on=['imdb_id'])
-train = pd.merge(train, actors, how='left', on=['imdb_id'])
+train = pd.merge(train, train_actors, how='left', on=['imdb_id'])
 
 test = pd.merge(test, testAdditionalFeatures, how='left', on=['imdb_id'])
-test = pd.merge(test, actors, how='left', on=['imdb_id'])
+test = pd.merge(test, test_actors, how='left', on=['imdb_id'])
 
 #Extra data included some missing data, it is best to fill them with mean.
 train['rating'].fillna(train['rating'].mean(), inplace = True)
@@ -240,8 +240,8 @@ train.loc[pd.isnull(train['belongs_to_collection']), "has_collection"] = 0
 train['has_tagline'] = 1
 train.loc[pd.isnull(train['tagline']), "has_tagline"] = 0
 
-train['isMovieReleased'] = 0
-train.loc[train['status'] == "Released", "isMovieReleased"] = 1
+#train['isMovieReleased'] = 0
+#train.loc[train['status'] == "Released", "isMovieReleased"] = 1
 
 #Some movies have different titles in the local language. Their revenue may had increased due to their nation-wise popularity.
 train['isTitleDifferent'] = 0
@@ -250,6 +250,9 @@ train.loc[train['original_title'] != train['title'] ,"isTitleDifferent"] = 1
 #Create new features for most common & high-grossing languages
 train['isOriginalLanguageEng'] = 0
 train.loc[train['original_language'] == "en" ,"isOriginalLanguageEng"] = 1
+
+train['isOriginalLanguageZh'] = 0
+train.loc[train['original_language'] == "zh" ,"isOriginalLanguageZh"] = 1
 
 #Calculate ratios which are highly-correlated with revenue.
 def calculate_ratios(df):
@@ -530,7 +533,6 @@ catmodel = cat.CatBoostRegressor(iterations=10000,
                                  bagging_temperature = 0.2,
                                  metric_period = None,
                                  early_stopping_rounds=200,
-                                 rsm = 0.1,
                                  random_seed=random_seed)
 
 Kfolder.validate(train, test, features , catmodel, name="catfinal", prepare_stacking=True,
@@ -538,27 +540,27 @@ Kfolder.validate(train, test, features , catmodel, name="catfinal", prepare_stac
 
 train['Revenue_lgb'] = train["lgbfinal"]
 
-print("RMSE model lgb :" ,score(train, train.Revenue_lgb),)
+print("RMSE model lgb :", score(train, train.Revenue_lgb),)
 
 train['Revenue_xgb'] = train["xgbfinal"]
 
-print("RMSE model xgb :" ,score(train, train.Revenue_xgb))
+print("RMSE model xgb :", score(train, train.Revenue_xgb))
 
 train['Revenue_cat'] = train["catfinal"]
 
-print("RMSE model cat :" ,score(train, train.Revenue_cat))
+print("RMSE model cat :", score(train, train.Revenue_cat))
 
 train['Revenue_Dragon1'] = 0.4 * train["lgbfinal"] + \
                                0.2 * train["xgbfinal"] + \
                                0.4 * train["catfinal"]
 
-print("RMSE model Dragon1 :" ,score(train, train.Revenue_Dragon1))
+print("RMSE model Dragon1 :", score(train, train.Revenue_Dragon1))
 
 train['Revenue_Dragon2'] = 0.35 * train["lgbfinal"] + \
                                0.3 * train["xgbfinal"] + \
                                0.35 * train["catfinal"]
 
-print("RMSE model Dragon2 :" ,score(train, train.Revenue_Dragon2))
+print("RMSE model Dragon2 :", score(train, train.Revenue_Dragon2))
 
 test['revenue'] =  np.expm1(0.4 * test["lgbfinal"]+ 0.4 * test["catfinal"] + 0.2 * test["xgbfinal"])
 test[['id','revenue']].to_csv('submission_Dragon1.csv', index=False)
