@@ -79,9 +79,6 @@ def gridSearchCV_with_MLP(X, y):
     clf = grid_obj.best_estimator_
     clf.fit(X, y)
 
-    print(clf.score(X, y))
-    print(clf.best_params_)
-
     predictions3 = clf.predict(test3)
 
     test3['revenue'] = predictions3
@@ -89,7 +86,7 @@ def gridSearchCV_with_MLP(X, y):
 
 
 # Partial and normal MLP
-# test_partial_fit_regression(X_train, y_train)
+test_partial_fit_regression(X_train, y_train)
 
 # GridSearchCV with MLP.
 gridSearchCV_with_MLP(X_train, y_train)
